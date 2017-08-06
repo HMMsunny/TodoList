@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script src="../build/react.js"></script>
+    <script src="../build/react-dom.js"></script>
+    <script src="../build/browser.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" >
+    <link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+    <div id="example" class="container">
+     
+    </div>
+      <script type="text/babel">
+// 组件划分
+//list
+//Item
+//itemEdit
+ 
+//创建一个可编辑列表的组件
+const ItemEdit=React.createClass({
+  //  设置初始状态 获取input输入框的值
+    getInitialState(){
+       return {
+           value:this.props.value
+       }
+    },
+    //  处理输入框输入值变化的事件
+    handleChange(event){
+        this.setState({
+            value:event.target.value
+        })
+    },
+  //  触发删除函数 传入一个id
+    remove(){
+          console.log(this.props.id);
+          this.props.onRemove(this.props.id);
+    },
+//触发确认函数  
+  confirm(){
+   this.props.onConfirm(this.props.id,this.state.value);
+      
+ },
+ 
+    render(){
+        return <li className="list-group-item">
+               <input type="text" value={this.state.value} className="edit" onChange={this.handleChange}/>
+               <a href="#"  className=" glyphicon glyphicon-check" onClick={this.confirm}></a>
+               <a href="#"  className=" glyphicon glyphicon-remove" onClick={this.remove}></a>
+               </li>
+    }
+})
+
+   //创建一个成功生成的列表组件
+const Item =React.createClass({
+    //删除一个确认好的list
+ removeItem(){
+  this.props.onRemoveItem(this.props.id);
+ },
+ //编辑已经生成好的列表
+ editItem(){
+   this.props.onEditItem(this.props.id,this.props.value);
+ },
+    render(){
+        return <li className="list-group-item">{this.props.value}
+             <a href="#"className="right glyphicon glyphicon-remove" onClick={this.removeItem}></a>
+             <a href="#" className="right glyphicon glyphicon-pencil" onClick={this.editItem}></a>
+        </li>
+    }
+});
+
+//一个包含所有组件的整体组件
+const List=React.createClass({
+    //初始化
+    getInitialState(){
+        return {
+            //保存键值
+            key:0,
+            key2:0,
+            //保存已经生成的列表
+            list:new Map(),
+            //保存正在编辑的列表
+            editList:new Map()
+        }
+    },
+    
+    //点击add添加编辑列表
+    add(){
+         const key =++this.state.key;
+         this.state.editList.set(key,{value:" "});
+         //强制刷新
+         this.forceUpdate();
+    },
+
+    //删除编辑列表
+      removeItem(id){
+          //根据id值，从列表中删除该节点
+      this.state.editList.delete(id);
+      this.forceUpdate();
+
+    },
+    //生成确认列表
+    confirmItem(id,value){
+        const key=++this.state.key2;
+        this.state.list.set(key,{value:value});
+        this.state.editList.delete(id);
+         //强制刷新
+         this.forceUpdate();
+
+    },
+    //删除确认列表
+    removeListItem(id){
+    this.state.list.delete(id);
+    this.forceUpdate();
+    },
+    //编辑已经生成好的列表  删除确认列表，增加一个编辑列表
+    editItem (id,value){
+      this.state.list.delete(id);
+      this.state.editList.set(id,{value:value});
+       this.forceUpdate();
+
+    },
+     render(){
+         //根据this.state.list和this.state.editList 生成所需的DOM结构
+         var listDom=[];
+         var editListDom=[];
+         //遍历保存列表的集合 生成DOM结构
+         for(let entity of this.state.list){
+             listDom.push(<Item id={entity[0]} key={entity[0]} value={entity[1].value} onRemoveItem={this.removeListItem} onEditItem={this.editItem}/>)
+           
+         }
+         for(let entity of this.state.editList){
+             editListDom.push(<ItemEdit id={entity[0]} key={entity[0]} value={entity[1].value} onRemove={this.removeItem} onConfirm={this.confirmItem}/>)
+
+         }
+         return <div>
+           <button onClick={this.add} className="btn btn-default">Add</button>
+           <ul className="list-group">
+           {listDom}
+           {editListDom}
+           </ul>
+         </div>
+    }
+ });
+ 
+ ReactDOM.render(
+    <List />,
+     document.getElementById("example")
+ )
+     
+
+      </script>
+</body>
+</html>

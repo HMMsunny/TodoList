@@ -1,0 +1,16 @@
+.right {
+    float:right;
+}
+button {
+    margin-top:10px;
+}
+.list-group {
+    margin-top:10px;
+}
+.list-group-item a {
+    margin-left:10px;
+}
+.list-group-item input {
+    outline:none;
+    border-width:0 0 1px 0;
+}

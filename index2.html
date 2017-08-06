@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script src="../build/react.js"></script>
+    <script src="../build/react-dom.js"></script>
+    <script src="../build/browser.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" >
+    <link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+    <div class="container">
+        <h1>Todo List</h1>
+        <div id="example" > </div>
+    </div>
+    
+      <script type="text/babel">
+
+//创建列表组件 ,根据是否编辑的状态，渲染不同的模式
+const Item =React.createClass({
+    getInitialState(){
+        return {
+            isEdit:false,
+            value:""
+        }
+        
+    },
+     handleChange(event){
+        this.setState({
+            value:event.target.value
+        })
+    },
+    //  触发删除函数 传入一个id
+    remove(){
+          this.props.onRemove(this.props.id);
+    },
+   
+ //触发确认函数  
+  confirm(){
+      this.setState({
+            isEdit:true
+        })
+   this.props.onConfirm(this.props.id,this.state.value);
+      
+ },
+ //编辑已经生成好的列表
+ editItem(){
+     this.setState({
+         isEdit:false
+     })
+   this.props.onEditItem(this.props.id,this.props.value);
+ },
+    render(){
+        if(this.state.isEdit){
+　　　　　　return <li className="list-group-item">{this.props.value}
+             <a href="#"className="right glyphicon glyphicon-remove" onClick={this.remove}></a>
+             <a href="#" className="right glyphicon glyphicon-pencil" onClick={this.editItem}></a>
+        </li>
+        }else{
+          return <li className="list-group-item">
+               <input type="text" value={this.state.value} className="edit" onChange={this.handleChange}/>
+               <a href="#"  className=" glyphicon glyphicon-check" onClick={this.confirm}></a>
+               <a href="#"  className=" glyphicon glyphicon-remove" onClick={this.remove}></a>
+               </li>
+        }
+    }
+});
+
+//一个包含所有组件的整体组件
+const List=React.createClass({
+    //初始化
+    getInitialState(){
+        return {
+            //保存键值
+            key:0,
+            //保存已经生成的列表
+            list:new Map()
+        }
+    },
+    
+    //点击add添加编辑列表
+    add(){
+         const key =++this.state.key;
+         this.state.list.set(key,{value:" "});
+         //强制刷新
+         this.forceUpdate();
+    },
+
+    //删除列表
+      removeItem(id){
+     //根据id值，从列表中删除该节点
+      this.state.list.delete(id);
+      this.forceUpdate();
+
+    },
+    //生成确认列表
+    confirmItem(id,value){
+ this.state.list.set(id,{value:value});
+         //强制刷新
+ this.forceUpdate();
+
+    },
+    
+    //编辑已经生成好的列表  删除确认列表，增加一个编辑列表
+    editItem (id,value){
+      this.state.list.set(id,{value:value});
+       this.forceUpdate();
+
+    },
+     render(){
+         //根据this.state.list和this.state.editList 生成所需的DOM结构
+         var listDom=[];
+         //遍历保存列表的集合 生成DOM结构
+         for(let entity of this.state.list){
+             listDom.push(<Item id={entity[0]} key={entity[0]} value={entity[1].value}  onEditItem={this.editItem} onRemove={this.removeItem} onConfirm={this.confirmItem}/>)
+           
+         }
+         return <div>
+           <button onClick={this.add} className="btn btn-default">Add</button>
+           <ul className="list-group">
+           {listDom}
+           </ul>
+         </div>
+    }
+ });
+ 
+ ReactDOM.render(
+    <List />,
+     document.getElementById("example")
+ )
+     
+</script>
+</body>
+</html>
